@@ -59,7 +59,7 @@ async function checkValues() {
   const ids = res.rows.map((row) => row.id)
   console.log(ids)
 
-  const res2 = await pg.query('SELECT id from things')
+  const res2 = await pg.query('SELECT id from things2')
   const ids2 = res2.rows.map((row) => row.id)
   console.log(ids2)
 }
