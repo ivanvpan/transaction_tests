@@ -28,8 +28,8 @@ async function clean() {
 }
 
 async function insert() {
-  const promises = _.range(100).map(async () => {
-    await pg.query('INSERT INTO things(id) VALUES (0)')
+  const promises = _.range(100).map(async (num) => {
+    await pg.query('INSERT INTO things(id) VALUES ($1)', [num])
   })
 
   await Promise.all(promises)
@@ -41,12 +41,12 @@ async function update(value) {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
-      const res = await client.query('SELECT * from things FOR UPDATE')
+      const res = await client.query('SELECT id from things FOR UPDATE ')
+      // const res = await client.query('SELECT id from things WHERE ID < 20 FOR UPDATE ')
       console.log('rows', res.rows.length)
       await wait(2000)
       await client.query('UPDATE things set id = $1', [value])
       await client.query('COMMIT')
-      console.log('Finished first')
     } finally {
       client.release()
       resolve()
@@ -58,9 +58,11 @@ async function update(value) {
     try {
       await wait(500)
       await client.query('BEGIN')
-      await client.query('UPDATE things set id = $1', [value * 2])
+      // await client.query('UPDATE things set id = 33 WHERE id > 80')
+      await client.query('UPDATE things set id = id * 2')
       await client.query('COMMIT')
       console.log('Finished second')
+      await checkValues()
     } finally {
       client.release()
       resolve()
